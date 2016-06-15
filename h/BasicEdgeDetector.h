@@ -7,12 +7,12 @@
 
 class BasicEdgeDetector : public EdgeDetector
 {
-    public:
+public:
     BasicEdgeDetector();
     BasicEdgeDetector( BMPImage *bmp );
     virtual void EdgeDetection();
     
-    private:
+private:
     void FindEdges(bool horizontal);
     void HorizontalEdges();
     void VerticalEdges();

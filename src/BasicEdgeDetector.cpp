@@ -1,28 +1,25 @@
 #include "BasicEdgeDetector.h"
 #include "BMPPixel.h"
-#include <vector>
 
 using namespace std;
 
-BasicEdgeDetector::BasicEdgeDetector() : EdgeDetector()
-{
-    one_direction_detector_called = false;
-}
+BasicEdgeDetector::BasicEdgeDetector()
+: EdgeDetector(), one_direction_detector_called( false )
+{}
 
-BasicEdgeDetector::BasicEdgeDetector( BMPImage *bmp ) : EdgeDetector( bmp )
-{
-    one_direction_detector_called = false;
-}
+BasicEdgeDetector::BasicEdgeDetector( BMPImage *bmp )
+: EdgeDetector( bmp ), one_direction_detector_called( false )
+{}
 
 void BasicEdgeDetector::EdgeDetection()
 {
-    cout << "\tBeginning \"Basic\" edge detection algorithm" << endl;
+    cout << "\tBeginning Basic edge detection algorithm" << endl;
     
     HorizontalEdges();
     VerticalEdges();
     one_direction_detector_called = false;
     
-    cout << "\tFinished \"Basic\" edge detection algorithm" << endl;
+    cout << "\tFinished Basic edge detection algorithm" << endl;
 }
 
 void BasicEdgeDetector::FindEdges(bool horizontal)
