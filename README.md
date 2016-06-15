@@ -8,12 +8,12 @@ C++ implementation of common edge detection algorithms in DSP
 Directories and Files:
 	/src				All of the C++ source files
 	
-	/h			All of the C++ header files
+	/h				All of the C++ header files
 	
-	/test_images		A few test bitmap images for testing
-		lina512.bmp	8-bit grayscale test image
-		airplane.bmp	24-bit RGB test image
-		baboon.bmp	24-bit RGB test image
+	/test_images			A few test bitmap images for testing
+		lena512.bmp		8-bit grayscale test image
+		airplane.bmp		24-bit RGB test image
+		baboon.bmp		24-bit RGB test image
 		
 	makefile		Makefile used by 'make' utility (You must have make installed)
 	input.txt		A simple text file to pass input to the program using '< input.txt'
