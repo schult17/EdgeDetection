@@ -6,6 +6,7 @@ Date:		7 June, 2016
 C++ implementation of common edge detection algorithms in DSP
 
 Directories and Files:
+
 	/src				All of the C++ source files
 	
 	/h				All of the C++ header files
