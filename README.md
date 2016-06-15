@@ -28,7 +28,9 @@ Using the input file 'input.txt', a nice test is to run these commands from the 
 	
 
 Limitations:
+
 BMPImage:
+
 -Supports 8-Bit grayscale and 24-Bit RGB pixel types. A message will be printed if you provide an image that does not use one of these formats.
 
 -Does not support any bitmap compression/decompression. A message will be printed if you provide an image that is compressed
