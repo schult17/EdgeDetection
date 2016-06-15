@@ -1,0 +1,4 @@
+test_images/airplane.bmp
+test_images/baboon.bmp
+quit
+

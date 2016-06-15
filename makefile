@@ -2,35 +2,48 @@
 
 # ***********************************************
 # Variables to control Makefile operation
-
 CXX = g++
-CXXFLAGS = -Wall -g
-LIBPATH = -L/usr/local/libjpeg-9b/lib/
-LIBS = -ljpeg
+CXXFLAGS = -Wall -g -I$(HDIR)
+LINKER = g++ -o
 TARGET = edgedetection
-OBJ = main.o JpegImage.o stringhelpers.o EdgeDetector.o
-BINDIR = bin
+
+# ***********************************************
+# Names of directories for source (.cpp),
+# headers (.h), objects (.o) and the program (.exe)
+SRCDIR = src
+HDIR = h
+OBJDIR = obj
+BINDIR = .
+
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+INCLUDES := $(wildcard $(HDIR)/*.h)
+OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 
 # ***********************************************
 # Targets needed to bring the executable up to date
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	@echo "Linking..."
+	@$(LINKER) $@ $(CCFLAGS) $(OBJECTS)
+	@echo "Done"
 
-$(TARGET) : $(OBJ)
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo "Compilation of "$<" complete"
+
+# Making object and binary directories if they
+# do not currently exist (-p)
+all: $(OBJECTS)
+$(OBJECTS): | $(OBJDIR)
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
 	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) $(LIBPATH) $(LIBS) $(OBJ) -o $(TARGET)
-	@mv *.o ./$(BINDIR)
-
-# The main.o target written more simply
-main.o: main.cpp JpegImage.h JpegImage.cpp stringhelpers.cpp stringhelpers.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
-
-EdgeDetector.o: EdgeDetector.h EdgeDetector.cpp JpegImage.h JpegImage.cpp
-JpegImage.o : JpegImage.h JpegImage.cpp
-stringhelpers.o : stringhelpers.h stringhelpers.cpp
 
 # ***********************************************
-# Clean rule
+# Clean rule: remove 
+.PHONEY: clean
 clean:
-	rm -f $(TARGET)
-	rm -rf $(BINDIR)
-	rm -f *~
-
+	@echo "Cleaning..."
+	@rm -rf $(OBJDIR)
+	@rm -f $(BINDIR)/$(TARGET)
+	@rm -f *~
+	@echo "Done"
