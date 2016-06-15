@@ -76,6 +76,7 @@ bool EdgeDetector::WriteBlackPixel( int x, int y )
         return WritePixel( x, y, 0x00 );
 }
 
+//24-Bit RGB version of write pixel
 bool EdgeDetector::WritePixel( int x, int y, unsigned char R, unsigned G, unsigned B )
 {
     if( x < 0 || x > outbmp->getWidth() || y < 0 || y > outbmp->getHeight() )
@@ -92,6 +93,7 @@ bool EdgeDetector::WritePixel( int x, int y, unsigned char R, unsigned G, unsign
     }
 }
 
+//8-Bit gray scale version of write pixel
 bool EdgeDetector::WritePixel( int x, int y, unsigned char grayscale )
 {
     if( x < 0 || x > outbmp->getWidth() || y < 0 || y > outbmp->getHeight() )
@@ -110,6 +112,7 @@ bool EdgeDetector::WritePixel( int x, int y, unsigned char grayscale )
 
 void EdgeDetector::AllocateOutputImage()
 {
+    cout << "\tCopying image:" << bmp->GetFilepath() << " to:" << filename << endl;
     if( outbmp != NULL )
         delete outbmp;
     
@@ -118,6 +121,7 @@ void EdgeDetector::AllocateOutputImage()
 
 void EdgeDetector::WriteBMP()
 {
+    cout << "\tWriting edge pixel data to the output BMP file: " << filename << endl;
     outbmp->Write();
 }
 

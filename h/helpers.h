@@ -5,5 +5,6 @@
 
 bool endsWith( std::string str, std::string postfix );
 std::string toLower( std::string str );
+bool fileExists( std::string filepath );
 
 #endif

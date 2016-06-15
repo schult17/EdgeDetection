@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "BasicEdgeDetector.h"
 #include "BMPImage.h"
-#include "stringhelpers.h"
+#include "helpers.h"
 
 using namespace std;
 
@@ -24,9 +24,14 @@ int main(int argc, char* argv[])
 
 		if( !endsWith( input, ".bmp" ) )
 		{
-			cout << "Image file must be a BMP format (.bmp)" << endl;
+			cerr << "Image file must be a BMP format (.bmp)" << endl;
 			continue;
 		}
+        else if( !fileExists( input ) )
+        {
+            cerr << "The file: " << input << " could not be found" << endl;
+            continue;
+        }
 
 		BMPImage bmp( input );
 		BasicEdgeDetector edgy( &bmp );

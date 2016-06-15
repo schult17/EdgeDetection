@@ -16,6 +16,9 @@
 #define INFO_BITS_PER_PIXEL_OFFSET 14
 #define INFO_COMPRESSION_OFFSET 16
 
+#define RGB_PIXEL_WIDTH 3
+#define GRAY_PIXEL_WIDTH 1
+
 class BMPImage
 {
 public:
@@ -29,6 +32,7 @@ public:
     int getWidth(){ return width; }
     int getHeight(){ return height; }
     std::string GetFilename();
+    std::string GetFilepath(){ return filename; }
     BMPPixel * getPixel( int x, int y );
     PixelType getPixelType(){ return type; }
     

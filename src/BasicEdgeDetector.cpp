@@ -47,7 +47,7 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             
             if( p1->type == _24BIT_RGB)
                 diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
-            else    //8 bit gray scale
+            else //8 bit gray scale
                 diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;
             
             if( diff < Bmin )
@@ -70,11 +70,13 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
             p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
         
+            //Finding the gradient value
             if( p1->type == _24BIT_RGB)
                 diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
-            else    //8 bit gray scale
+            else//8 bit gray scale
                 diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;
             
+            //Normalizing by min and max difference value already calculated (always +)
             diff = (((float)diff - (float)Bmin)/((float)Bmax - (float)Bmin)) * 255.0;
                 
             
@@ -104,10 +106,12 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
 
 void BasicEdgeDetector::HorizontalEdges()
 {
+    cout << "\t\tFinding horizontal edges" << endl;
     FindEdges( true );
 }
 
 void BasicEdgeDetector::VerticalEdges()
 {
+    cout << "\t\tFinding vertical edges" << endl;
     FindEdges( false );
 }

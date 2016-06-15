@@ -1,5 +1,7 @@
-#include "stringhelpers.h"
+#include "helpers.h"
 #include <iostream>
+#include <sys/stat.h>
+
 using namespace std;
 
 bool endsWith( string str, string postfix )
@@ -33,4 +35,11 @@ string toLower( string str )
                 str[i] = tolower(str[i]);
 
         return str;
+}
+
+bool fileExists( string filepath )
+{
+    struct stat dummy;
+    
+    return ( stat(filepath.c_str(), &dummy) == 0 );
 }

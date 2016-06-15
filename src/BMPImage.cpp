@@ -126,6 +126,7 @@ void BMPImage::Read()
         bmpInfoHeader[i] = (unsigned char)read;
     }
     
+    //get width and height of file
     width = *( (int*)(bmpInfoHeader+4) );
     height = *( (int*)(bmpInfoHeader+8) );
     
@@ -163,7 +164,7 @@ void BMPImage::Read()
     //------------------------//
     
     //Calculating and reading pixel data
-    rowSize = int( floor( (bitsPerPixel * width + 31.)/32 ) ) *4;
+    rowSize = int( floor( (bitsPerPixel * width + 31.)/32 ) ) * 4;   //row size includes padding
     pixelArraySize = rowSize * abs(height);
     
     pixelData = new unsigned char[pixelArraySize];
@@ -188,7 +189,7 @@ BMPPixel * BMPImage::getPixel( int x, int y )
     {
         if( type == _24BIT_RGB )
         {
-            int pixel_base = rowSize * y + 3 * x;
+            int pixel_base = rowSize * y + RGB_PIXEL_WIDTH * x;
             
             unsigned char R, G, B;
             R = pixelData[pixel_base + 2];
@@ -199,7 +200,7 @@ BMPPixel * BMPImage::getPixel( int x, int y )
         }
         else        //8 bit grayscale
         {
-            int pixel_base = rowSize * y + 1 * x;
+            int pixel_base = rowSize * y + GRAY_PIXEL_WIDTH * x;
             unsigned char gray = pixelData[pixel_base];
             return new GrayPixel8( gray );
         }
@@ -228,7 +229,7 @@ void BMPImage::setPixel( int x, int y, BMPPixel *pixel )
     if( pixel->type == _24BIT_RGB )
     {
         RGBPixel24 *p = (RGBPixel24 *)pixel;
-        int pixel_base = rowSize * y + 3 * x;
+        int pixel_base = rowSize * y + RGB_PIXEL_WIDTH * x;
         pixelData[pixel_base + 2] = p->R;
         pixelData[pixel_base + 1] = p->G;
         pixelData[pixel_base] = p->B;
@@ -236,7 +237,7 @@ void BMPImage::setPixel( int x, int y, BMPPixel *pixel )
     else
     {
         GrayPixel8 *p = (GrayPixel8 *)pixel;
-        pixelData[rowSize * y + 1 * x] = p->grayscale;
+        pixelData[rowSize * y + GRAY_PIXEL_WIDTH * x] = p->grayscale;
     }
 }
 
@@ -249,7 +250,7 @@ void BMPImage::writePixel( int x, int y, std::fstream &file )
     if( pixel->type == _24BIT_RGB )
     {
         RGBPixel24 *p = (RGBPixel24 *)pixel;
-        int base_offset = pixelArrayOffset + rowSize * y + 3 * x;
+        int base_offset = pixelArrayOffset + rowSize * y + RGB_PIXEL_WIDTH * x;
         
         //write to file
         file.seekg( base_offset, ios::beg );
@@ -263,7 +264,7 @@ void BMPImage::writePixel( int x, int y, std::fstream &file )
     {
         //TODO -- why is this red?
         GrayPixel8 *p = (GrayPixel8 *)pixel;
-        file.seekg( pixelArrayOffset + rowSize * y + 1 * x, ios::beg );
+        file.seekg( pixelArrayOffset + rowSize * y + GRAY_PIXEL_WIDTH * x, ios::beg );
         file << p->grayscale;
     }
     

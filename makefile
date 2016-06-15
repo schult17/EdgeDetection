@@ -43,7 +43,7 @@ $(OBJDIR):
 .PHONEY: clean
 clean:
 	@echo "Cleaning..."
-	@rm -rf $(OBJDIR)
-	@rm -f $(BINDIR)/$(TARGET)
+	rm -rf $(OBJDIR)
+	rm -f $(BINDIR)/$(TARGET)
 	@rm -f *~
 	@echo "Done"
