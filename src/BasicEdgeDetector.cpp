@@ -29,12 +29,13 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
     int h = bmp->getHeight();
     BMPPixel *p1, *p2;
     
+    bool rgb24bit = (bmp->getPixelType() == _24BIT_RGB);
+    
     int Bmin = 300;
     int Bmax = -300;
     
     int diff;
     
-    //Finding the min and max difference in gray scale value
     for( int x = (horizontal ? 0:1); x < w - (horizontal ? 0:1); x++ )
     {
         for( int y = (!horizontal ? 0:1); y < h - (!horizontal ? 0:1); y++ )
@@ -42,7 +43,7 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
             p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
             
-            if( p1->type == _24BIT_RGB)
+            if( rgb24bit)
                 diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
             else //8 bit gray scale
                 diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;
@@ -68,7 +69,7 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
         
             //Finding the gradient value
-            if( p1->type == _24BIT_RGB)
+            if( rgb24bit )
                 diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
             else//8 bit gray scale
                 diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;

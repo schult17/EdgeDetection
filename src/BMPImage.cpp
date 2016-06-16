@@ -9,6 +9,8 @@
 
 using namespace std;
 
+bool BMPImage::out_of_bounds_pixel_read = false;
+
 BMPImage::BMPImage( string filename ) : filename( filename )
 {
     Read();
@@ -25,6 +27,16 @@ BMPImage::BMPImage( const BMPImage &cpy )
 
 BMPImage::BMPImage( const BMPImage &cpy, string filename )
 {
+    onCopy( cpy, filename, NULL );
+}
+
+BMPImage::BMPImage( const BMPImage &cpy, string filename, int init_val )
+{
+    onCopy( cpy, filename, &init_val );
+}
+
+void BMPImage::onCopy( const BMPImage &cpy, string filename, int *init_val )
+{
     memcpy( bmpFileHeader, cpy.bmpFileHeader, FILE_HEADER_SIZE );
     pixelArrayOffset = cpy.pixelArrayOffset;
     memcpy( bmpInfoHeader, cpy.bmpInfoHeader, INFO_HEADER_SIZE );
@@ -38,7 +50,11 @@ BMPImage::BMPImage( const BMPImage &cpy, string filename )
     pixelArraySize = cpy.pixelArraySize;
     
     pixelData = new unsigned char[pixelArraySize];
-    memcpy( pixelData, cpy.pixelData, pixelArraySize );
+    
+    if( init_val == NULL )
+        memcpy( pixelData, cpy.pixelData, pixelArraySize );
+    else
+        memset( pixelData, *init_val, pixelArraySize );
     
     this->filename = filename;
     
@@ -205,10 +221,13 @@ BMPPixel * BMPImage::getPixel( int x, int y )
             return new GrayPixel8( gray );
         }
     }
-    else
+    else        //useful for edge detection, return black outside image
     {
-        cerr << "Invalid X or Y value when reading pixel from: " << filename << endl;
-        return new RGBPixel24();
+        out_of_bounds_pixel_read = true;
+        return ((type == _24BIT_RGB) ?
+                static_cast<BMPPixel*>( new RGBPixel24(0x00, 0x00, 0x00) ) :
+                static_cast<BMPPixel*>( new GrayPixel8(0x00) )
+                );
     }
 }
 

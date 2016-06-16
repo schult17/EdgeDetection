@@ -116,7 +116,8 @@ void EdgeDetector::AllocateOutputImage()
     if( outbmp != NULL )
         delete outbmp;
     
-    outbmp = new BMPImage( *bmp, filename );
+    //fill pixel data with 0's (black)
+    outbmp = new BMPImage( *bmp, filename, 0 );
 }
 
 void EdgeDetector::WriteBMP()

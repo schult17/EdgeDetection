@@ -25,6 +25,7 @@ public:
 	BMPImage( std::string filename );
     BMPImage( const BMPImage &cpy );
     BMPImage( const BMPImage &cpy, std::string filename );
+    BMPImage( const BMPImage &cpy, std::string filename, int init_val );
 	~BMPImage();
     
     void Remove();
@@ -41,9 +42,13 @@ public:
     void setPixel( int x, int y, BMPPixel *pixel );
     
     void Write();
+    
+    static bool out_of_bounds_pixel_read;
 
 private:
     void Read();
+    
+    void onCopy( const BMPImage &cpy, std::string filename, int *init_val );
     
     unsigned char bmpFileHeader[FILE_HEADER_SIZE];
     unsigned char pixelArrayOffset;

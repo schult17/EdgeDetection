@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "BasicEdgeDetector.h"
+#include "SobelEdgeDetector.h"
 #include "BMPImage.h"
 #include "helpers.h"
 
@@ -34,7 +35,8 @@ int main(int argc, char* argv[])
         }
 
 		BMPImage bmp( input );
-		BasicEdgeDetector edgy( &bmp );
+		//BasicEdgeDetector edgy( &bmp );
+        SobelEdgeDetector edgy( &bmp );
 		edgy.DetectEdges();
 	}
 
