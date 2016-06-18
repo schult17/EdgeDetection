@@ -6,21 +6,29 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define MARK cout << "\tAt " << __LINE__ << endl;
+//TODO -- Robinson compass
+//TODO -- Box smoothing
+//TODO -- Gaussian Smoothing
 
 using namespace std;
 
 EdgeDetector::EdgeDetector()
-: filename( "output_images/edged.bmp" ),  bmp( NULL ), outbmp(NULL), raw_edge_image( NULL )
+: filename( "output_images/edged.bmp" ),  bmp( NULL ), outbmp(NULL)
 {
     MakeOutputDir();
 }
 
 EdgeDetector::EdgeDetector( BMPImage *bmp )
-: filename( "output_images/edged.bmp" ), bmp( bmp ), outbmp(NULL), raw_edge_image( NULL )
+: filename( "output_images/edged.bmp" ), bmp( bmp ), outbmp(NULL)
 {
     this->filename = "output_images/" + bmp->GetFilename();
     MakeOutputDir();
+}
+
+EdgeDetector::~EdgeDetector()
+{
+    if( outbmp != NULL )
+        delete outbmp;
 }
 
 void  EdgeDetector::SetOutputFilePath( std::string filename )
@@ -62,21 +70,14 @@ void EdgeDetector::MakeOutputDir()
 
 bool EdgeDetector::WriteWhitePixel( int x, int y )
 {
-    if( outbmp->getPixelType() == _24BIT_RGB )
-        return WritePixel( x, y, 0xFF, 0xFF, 0xFF );
-    else
-        return WritePixel( x, y, 0xFF );
+    return WritePixel( x, y, 0xFF, 0xFF, 0xFF );
 }
 
 bool EdgeDetector::WriteBlackPixel( int x, int y )
 {
-    if( outbmp->getPixelType() == _24BIT_RGB )
-        return WritePixel( x, y, 0x00, 0x00, 0x00 );
-    else
-        return WritePixel( x, y, 0x00 );
+    return WritePixel( x, y, 0x00, 0x00, 0x00 );
 }
 
-//24-Bit RGB version of write pixel
 bool EdgeDetector::WritePixel( int x, int y, unsigned char R, unsigned G, unsigned B )
 {
     if( x < 0 || x > outbmp->getWidth() || y < 0 || y > outbmp->getHeight() )
@@ -85,29 +86,14 @@ bool EdgeDetector::WritePixel( int x, int y, unsigned char R, unsigned G, unsign
     }
     else
     {
-        RGBPixel24 *tmp = new RGBPixel24(R, G, B);
-        outbmp->setPixel( x, y, tmp );
-        delete tmp;
-        
+        outbmp->setPixel( x, y, BMPPixel(R, G, B) );
         return true;
     }
 }
 
-//8-Bit gray scale version of write pixel
 bool EdgeDetector::WritePixel( int x, int y, unsigned char grayscale )
 {
-    if( x < 0 || x > outbmp->getWidth() || y < 0 || y > outbmp->getHeight() )
-    {
-        return false;
-    }
-    else
-    {
-        GrayPixel8 *tmp = new GrayPixel8( grayscale );
-        outbmp->setPixel( x, y, tmp );
-        delete tmp;
-        
-        return true;
-    }
+    return WritePixel( x, y, grayscale, grayscale, grayscale );
 }
 
 void EdgeDetector::AllocateOutputImage()

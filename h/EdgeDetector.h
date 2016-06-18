@@ -8,6 +8,8 @@ class EdgeDetector
 	public:
     EdgeDetector();
 	EdgeDetector( BMPImage *bmp );
+    ~EdgeDetector();
+    
 	void SetOutputFilePath( std::string filename );
     BMPImage* SetBMPimage( BMPImage *bmp );
     void DetectEdges();
@@ -32,7 +34,6 @@ class EdgeDetector
 	std::string filename;
     BMPImage *bmp;
     BMPImage *outbmp;
-    unsigned char *raw_edge_image;
 };
 
 #endif

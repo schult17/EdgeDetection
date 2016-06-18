@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "BMPPixel.h"
+#include "BMPImageData.h"
 
 #define FILE_HEADER_SIZE 14
 #define INFO_HEADER_SIZE 40
@@ -16,35 +17,34 @@
 #define INFO_BITS_PER_PIXEL_OFFSET 14
 #define INFO_COMPRESSION_OFFSET 16
 
-#define RGB_PIXEL_WIDTH 3
-#define GRAY_PIXEL_WIDTH 1
-
 class BMPImage
 {
 public:
-	BMPImage( std::string filename );
+    BMPImage( std::string filename );
     BMPImage( const BMPImage &cpy );
     BMPImage( const BMPImage &cpy, std::string filename );
     BMPImage( const BMPImage &cpy, std::string filename, int init_val );
-	~BMPImage();
+    ~BMPImage();
     
     void Remove();
     
-    int getWidth(){ return width; }
-    int getHeight(){ return height; }
+    int getWidth(){ return pixelData->getWidth(); }
+    int getHeight(){ return pixelData->getHeight(); }
     std::string GetFilename();
     std::string GetFilepath(){ return filename; }
-    BMPPixel * getPixel( int x, int y );
-    PixelType getPixelType(){ return type; }
+    BMPPixel getPixel( int x, int y ){ return pixelData->getPixel( x, y ); }
+    BMPImageData getPixelData();
     
     void SetFilename(){ this->filename = filename; }
     void writePixel( int x, int y, std::fstream &file );
-    void setPixel( int x, int y, BMPPixel *pixel );
+    void setPixel( int x, int y, BMPPixel pixel ){ pixelData->setPixel( x, y, pixel ); }
+    
+    void swapPixelData( unsigned char *new_data ){ pixelData->swapPixelData( new_data ); }
     
     void Write();
     
     static bool out_of_bounds_pixel_read;
-
+    
 private:
     void Read();
     
@@ -54,19 +54,11 @@ private:
     unsigned char pixelArrayOffset;
     unsigned char bmpInfoHeader[INFO_HEADER_SIZE];
     
-    int height;
-    int width;
-    int bitsPerPixel;
-    
-    int rowSize;
-    int pixelArraySize;
-    
-    unsigned char *pixelData;
+    BMPImageData *pixelData;
     
     std::string filename;
-    
-    PixelType type;
 };
+
 
 #endif
 

@@ -27,9 +27,7 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
     bool set_non_edge_pixels_black = true;
     int w = bmp->getWidth();
     int h = bmp->getHeight();
-    BMPPixel *p1, *p2;
-    
-    bool rgb24bit = (bmp->getPixelType() == _24BIT_RGB);
+    BMPPixel p1, p2;
     
     int Bmin = 300;
     int Bmax = -300;
@@ -43,20 +41,13 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
             p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
             
-            if( rgb24bit)
-                diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
-            else //8 bit gray scale
-                diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;
+            diff = p2.toGrayScale() - p1.toGrayScale();
             
             if( diff < Bmin )
                 Bmin = diff;
             
             if( diff > Bmax )
                 Bmax = diff;
-            
-            delete p1;
-            delete p2;
-            p1 = p2 = NULL;
         }
     }
     
@@ -68,11 +59,7 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
             p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
             p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
         
-            //Finding the gradient value
-            if( rgb24bit )
-                diff = ((RGBPixel24 *)p2)->toGrayScale() - ((RGBPixel24 *)p1)->toGrayScale();
-            else//8 bit gray scale
-                diff = ((GrayPixel8 *)p2)->grayscale - ((GrayPixel8 *)p1)->grayscale;
+            diff = p2.toGrayScale() - p1.toGrayScale();
             
             //Normalizing by min and max difference value already calculated (always +)
             diff = (((float)diff - (float)Bmin)/((float)Bmax - (float)Bmin)) * 255.0;
@@ -92,10 +79,6 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
                     set_non_edge_pixels_black = true;
                 }
             }
-            
-            delete p1;
-            delete p2;
-            p1 = p2 = NULL;
         }
     }
     

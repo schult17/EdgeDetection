@@ -5,8 +5,6 @@
 #include <cstddef>
 #include <cmath>
 
-//TODO -- support 8 bit grayscale as well as 24 bit RGB
-
 using namespace std;
 
 bool BMPImage::out_of_bounds_pixel_read = false;
@@ -37,26 +35,14 @@ BMPImage::BMPImage( const BMPImage &cpy, string filename, int init_val )
 
 void BMPImage::onCopy( const BMPImage &cpy, string filename, int *init_val )
 {
+    //Copy the header data (same type of image)
     memcpy( bmpFileHeader, cpy.bmpFileHeader, FILE_HEADER_SIZE );
     pixelArrayOffset = cpy.pixelArrayOffset;
     memcpy( bmpInfoHeader, cpy.bmpInfoHeader, INFO_HEADER_SIZE );
     
-    
-    width = cpy.width;
-    height = cpy.height;
-    bitsPerPixel = cpy.bitsPerPixel;
-    
-    rowSize = cpy.rowSize;
-    pixelArraySize = cpy.pixelArraySize;
-    
-    pixelData = new unsigned char[pixelArraySize];
-    
-    if( init_val == NULL )
-        memcpy( pixelData, cpy.pixelData, pixelArraySize );
-    else
-        memset( pixelData, *init_val, pixelArraySize );
-    
-    this->filename = filename;
+    //Use BMPImageData's copy constructor with the init_val pointer
+    delete pixelData;
+    pixelData = new BMPImageData( *(cpy.pixelData), *init_val );
     
     //making copy of actual image
     ofstream copyfile( filename.c_str(), ios_base::out | ios_base::binary  );
@@ -68,6 +54,7 @@ void BMPImage::onCopy( const BMPImage &cpy, string filename, int *init_val )
     if( !copyfile )
         cerr << "Couldn't open output file: " << filename << endl;
     
+    //use read and write, << and >> may skip spaces (big headache)
     char c;
     while(infile)
     {
@@ -75,13 +62,13 @@ void BMPImage::onCopy( const BMPImage &cpy, string filename, int *init_val )
         copyfile.write( &c, 1 );
     }
     
-    type = cpy.type;
+    //This got deleted, don't let this get deleted...
+    this->filename = filename;
 }
 
 BMPImage::~BMPImage()
 {
     delete pixelData;
-    pixelData = NULL;
 }
 
 //Use this to delete the file AND the object.
@@ -100,6 +87,19 @@ void BMPImage::Remove()
     delete this;
 }
 
+BMPImageData BMPImage::getPixelData()
+{
+    if( pixelData == NULL )
+    {
+        cerr << "FATAL: trying to call getPixelData() on a BMPImage that does not have a BMPImageData object allocated" << endl;
+        exit(-1);
+    }
+    else
+    {
+        return *pixelData;
+    }
+}
+
 void BMPImage::Read()
 {
     cout << "\tReading BMP file: " << filename << endl;
@@ -111,9 +111,19 @@ void BMPImage::Read()
         exit(-1);
     }
     
+    //BMP variables
+    int height;
+    int width;
+    int bitsPerPixel;
+    
+    int rowSize;
+    int pixelArraySize;
+    unsigned char *pixel_data;
+     
     //read from the file into this unsigned char
     char read = '\0';
     
+    //------------------------//
     //read in the file header
     for( int i = 0; i < FILE_HEADER_SIZE; i++ )
     {
@@ -130,8 +140,8 @@ void BMPImage::Read()
     
     if( bmpFileHeader[11] != 0 || bmpFileHeader[12] != 0 || bmpFileHeader[13] != 0 )
     {
-        cerr << "\tSomething is probably wrong...BMPImage.cpp: " << __LINE__ << endl;
-        //exit(-1);
+        cerr << "\tSomething is probably wrong with the image...BMPImage.cpp: " << __LINE__ << endl;
+        exit(-1);
     }
     //------------------------//
     
@@ -150,26 +160,10 @@ void BMPImage::Read()
     
     bitsPerPixel = bmpInfoHeader[INFO_BITS_PER_PIXEL_OFFSET];
     
-    if( bitsPerPixel != 24 && bitsPerPixel != 8 )
+    if( bitsPerPixel != 24 )
     {
         cerr << "\t" << bitsPerPixel << " bits per pixel is not supported currently." << endl;
         exit(-1);
-    }
-    else
-    {
-        //8 bit grayscale or 24 bit RGB, figure it out
-        switch( bitsPerPixel )
-        {
-            case 8:
-                type = _8BIT_GRAY;
-                break;
-            case 24:
-                type = _24BIT_RGB;
-                break;
-            default:
-                type = UNKWN;
-                break;
-        }
     }
     
     if( bmpInfoHeader[INFO_COMPRESSION_OFFSET] != 0 )
@@ -183,122 +177,70 @@ void BMPImage::Read()
     rowSize = int( floor( (bitsPerPixel * width + 31.)/32 ) ) * 4;   //row size includes padding
     pixelArraySize = rowSize * abs(height);
     
-    pixelData = new unsigned char[pixelArraySize];
+    pixel_data = new unsigned char[pixelArraySize];
     
     infile.seekg( pixelArrayOffset, ios::beg );
     
     for( int i = 0; i < pixelArraySize; i++ )
     {
         infile.read( &read, 1 );
-        pixelData[i] = (unsigned char)read;
+        pixel_data[i] = (unsigned char)read;
     }
     //------------------------//
     
-    cout << "\tDone" << endl;
-}
-
-BMPPixel * BMPImage::getPixel( int x, int y )
-{
-    y = height - 1 - y;     //must flip Y
+    //-----set BMP data in BMPImageData-----//
+    //pixelData.setData( height, width, bitsPerPixel, rowSize, pixelArraySize, pixel_data );
+    pixelData = new BMPImageData( height, width, bitsPerPixel, rowSize, pixelArraySize, pixel_data );
+    //--------------------------------------//
     
-    if( x >= 0 && x <= width && y >= 0 && y <= height )
-    {
-        if( type == _24BIT_RGB )
-        {
-            int pixel_base = rowSize * y + RGB_PIXEL_WIDTH * x;
-            
-            unsigned char R, G, B;
-            R = pixelData[pixel_base + 2];
-            G = pixelData[pixel_base + 1];
-            B = pixelData[pixel_base];
-            
-            return new RGBPixel24( R, G, B );
-        }
-        else        //8 bit grayscale
-        {
-            int pixel_base = rowSize * y + GRAY_PIXEL_WIDTH * x;
-            unsigned char gray = pixelData[pixel_base];
-            return new GrayPixel8( gray );
-        }
-    }
-    else        //useful for edge detection, return black outside image
-    {
-        out_of_bounds_pixel_read = true;
-        return ((type == _24BIT_RGB) ?
-                static_cast<BMPPixel*>( new RGBPixel24(0x00, 0x00, 0x00) ) :
-                static_cast<BMPPixel*>( new GrayPixel8(0x00) )
-                );
-    }
+    cout << "\tDone" << endl;
 }
 
 string BMPImage::GetFilename()
 {
     size_t found = filename.find_last_of( '/' );
+    
     if( found != string::npos )
         return filename.substr( found+1 );
     else
         return filename;
 }
 
-void BMPImage::setPixel( int x, int y, BMPPixel *pixel )
-{
-    y = height - 1 - y;         //flipping
-    
-    //editing data in pixelData array
-    if( pixel->type == _24BIT_RGB )
-    {
-        RGBPixel24 *p = (RGBPixel24 *)pixel;
-        int pixel_base = rowSize * y + RGB_PIXEL_WIDTH * x;
-        pixelData[pixel_base + 2] = p->R;
-        pixelData[pixel_base + 1] = p->G;
-        pixelData[pixel_base] = p->B;
-    }
-    else
-    {
-        GrayPixel8 *p = (GrayPixel8 *)pixel;
-        pixelData[rowSize * y + GRAY_PIXEL_WIDTH * x] = p->grayscale;
-    }
-}
-
 void BMPImage::writePixel( int x, int y, std::fstream &file )
 {
-    BMPPixel *pixel = getPixel( x, y );
+    BMPPixel pixel = pixelData->getPixel( x, y );
     
-    y = height - 1 - y;         //flipping
+    y = pixelData->getHeight() - 1 - y;         //flipping
     
-    if( pixel->type == _24BIT_RGB )
-    {
-        RGBPixel24 *p = (RGBPixel24 *)pixel;
-        int base_offset = pixelArrayOffset + rowSize * y + RGB_PIXEL_WIDTH * x;
-        
-        //write to file
-        file.seekg( base_offset, ios::beg );
-        file << p->B;
-        file.seekg( base_offset + 1, ios::beg );
-        file << p->G;
-        file.seekg( base_offset + 2, ios::beg );
-        file << p->R;
-    }
-    else            //8 bit grayscale
-    {
-        //TODO -- why is this red?
-        GrayPixel8 *p = (GrayPixel8 *)pixel;
-        file.seekg( pixelArrayOffset + rowSize * y + GRAY_PIXEL_WIDTH * x, ios::beg );
-        file << p->grayscale;
-    }
+    int base_offset = pixelArrayOffset + pixelData->getRowSize() * y + RGB_PIXEL_WIDTH * x;
     
-    //free allocated pixel for dynamic casting
-    delete pixel;
-    pixel = NULL;
+    //write to file
+    file.seekg( base_offset, ios::beg );
+    file << pixel.B;
+    file.seekg( base_offset + 1, ios::beg );
+    file << pixel.G;
+    file.seekg( base_offset + 2, ios::beg );
+    file << pixel.R;
+    
 }
 
 void BMPImage::Write()
 {
     fstream file( filename.c_str() );
     
-    for( int x = 0; x < width; x++ )
-        for( int y = 0; y < height; y++ )
-            writePixel( x, y, file );
+    if( !file )
+    {
+        cerr << "Couldn't open Edge detection output file: " << filename << endl;
+    }
+    else
+    {
+        int width = pixelData->getWidth();
+        int height = pixelData->getHeight();
+        
+        for( int x = 0; x < width; x++ )
+            for( int y = 0; y < height; y++ )
+                writePixel( x, y, file );
+    }
 }
 
 

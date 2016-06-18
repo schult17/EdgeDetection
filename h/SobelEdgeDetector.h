@@ -18,8 +18,7 @@ public:
     static const int filter_x[SOBEL_DIM][SOBEL_DIM];
     static const int filter_y[SOBEL_DIM][SOBEL_DIM];
     
-    unsigned int filterPixels( RGBPixel24 **pixels );
-    unsigned int filterPixels( GrayPixel8 **pixels );
+    unsigned int filterPixels( BMPPixel *pixels );
 };
 
 #endif
