@@ -8,8 +8,12 @@
 class BasicEdgeDetector : public Filter
 {
 public:
-    BasicEdgeDetector( BMPImage *bmpimage );
-    BasicEdgeDetector( BMPImageData *bmp );
+    BasicEdgeDetector( BMPImage *bmpimage )
+    : Filter( bmpimage ), one_direction_detector_called( false ){}
+    
+    BasicEdgeDetector( BMPImageData *bmp )
+    : Filter( bmp ), one_direction_detector_called( false ){}
+    
     virtual void ApplyFilter();
     
 private:

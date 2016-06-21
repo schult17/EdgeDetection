@@ -14,15 +14,6 @@ const int SobelEdgeDetector::filter_y[SOBEL_DIM][SOBEL_DIM] = {{-1, -2, -1},
                                                                {0, 0, 0},
                                                                {1, 2, 1} };
 
-
-SobelEdgeDetector::SobelEdgeDetector( BMPImage *bmpimage )
-: Filter( bmpimage )
-{}
-
-SobelEdgeDetector::SobelEdgeDetector( BMPImageData *bmp )
-: Filter( bmp )
-{}
-
 void SobelEdgeDetector::ApplyFilter()
 {
     cout << "\tBeginning Sobel edge detection algorithm" << endl;

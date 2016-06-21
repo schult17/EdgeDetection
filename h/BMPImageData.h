@@ -9,10 +9,10 @@
 class BMPImageData
 {
 public:
-    enum FillMode{ Wrap, Black, White };
+    enum FillMode{ Wrap, Black, White, Null };
     
     BMPImageData( FillMode mode = Wrap );
-    BMPImageData( int height, int width, int bitsPerPixel, int rowSize, int pixelArraySize, unsigned char *data, FillMode mode = Wrap );
+    BMPImageData( int height, int width, int bitsPerPixel, int rowSize, int pixelArraySize, unsigned char *data, FillMode mode = Null );
     BMPImageData( const BMPImageData &cpy );
     ~BMPImageData();
     

@@ -36,17 +36,15 @@ int main(int argc, char* argv[])
         }
 
         BMPImage bmp( input );
-        bmp.setWrapMode( BMPImageData::White );
+        bmp.setWrapMode( BMPImageData::Null );
         
-        BoxFilter box( &bmp, 3 );
+        BoxFilter box( &bmp, 1 );
         box.ApplyFilter();
         
-        /*
         SobelEdgeDetector sobel( box.GetOutputData() );
         sobel.ApplyFilter();
-         */
         
-        BMPImage outbmp( bmp, "output_images/test.bmp", box.GetOutputData() );
+        BMPImage outbmp( bmp, "output_images/test.bmp", sobel.GetOutputData() );
         outbmp.Write();
 	}
 

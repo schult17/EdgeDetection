@@ -9,8 +9,9 @@
 class SobelEdgeDetector : public Filter
 {
 public:
-    SobelEdgeDetector( BMPImage *bmpimage );
-    SobelEdgeDetector( BMPImageData *bmp );
+    SobelEdgeDetector( BMPImage *bmpimage ) : Filter( bmpimage ) {}
+    SobelEdgeDetector( BMPImageData *bmp ) : Filter( bmp ){}
+    
     virtual void ApplyFilter();
     
 private:

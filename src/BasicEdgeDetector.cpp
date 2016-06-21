@@ -3,14 +3,6 @@
 
 using namespace std;
 
-BasicEdgeDetector::BasicEdgeDetector( BMPImage *bmpimage )
-: Filter( bmpimage ), one_direction_detector_called( false )
-{}
-
-BasicEdgeDetector::BasicEdgeDetector( BMPImageData *bmp )
-: Filter( bmp ), one_direction_detector_called( false )
-{}
-
 void BasicEdgeDetector::ApplyFilter()
 {
     cout << "\tBeginning Basic edge detection algorithm" << endl;

@@ -108,9 +108,13 @@ BMPPixel BMPImageData::getPixel( int x, int y )
                 return BMPPixel( 0xFF, 0xFF, 0xFF );
             }
             case Black:
-            default:
             {
                 return BMPPixel( 0x00, 0x00, 0x00 );
+            }
+            case Null:
+            default:
+            {
+                return BMPPixel();
             }
         }
     }

@@ -8,8 +8,11 @@
 class BoxFilter : public Filter
 {
 public:
-    BoxFilter( BMPImage *bmpimage, int radius = DEFAULT_RADIUS );
-    BoxFilter( BMPImageData *bmp, int radius = DEFAULT_RADIUS );
+    BoxFilter( BMPImage *bmpimage, int radius = DEFAULT_RADIUS )
+    : Filter( bmpimage ), radius( std::max(radius, DEFAULT_RADIUS) ){}
+    
+    BoxFilter( BMPImageData *bmp, int radius = DEFAULT_RADIUS )
+    : Filter( bmp ), radius( std::max(radius, DEFAULT_RADIUS) ){}
     
     virtual void ApplyFilter();
     
@@ -17,6 +20,7 @@ public:
     
 private:
     void filterPixels( int x, int y, int DIM, BMPPixel *pixels );
+    
     int radius;
 };
 

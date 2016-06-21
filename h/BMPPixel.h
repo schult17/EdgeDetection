@@ -9,10 +9,14 @@ public:
     BMPPixel( unsigned char gray );
     
     unsigned int toGrayScale();
+    bool isNull() { return Null; }
     
     unsigned char R;
     unsigned char G;
     unsigned char B;
+    
+private:
+    bool Null;
 };
 
 #endif

@@ -174,7 +174,7 @@ void BMPImage::Read()
     pixelData = new BMPImageData( height, width, bitsPerPixel, rowSize, pixelArraySize, pixel_data );
     //--------------------------------------//
     
-    cout << "\tDone" << endl;
+    cout << "\tDone reading" << endl;
 }
 
 string BMPImage::GetFilename()
