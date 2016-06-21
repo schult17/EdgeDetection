@@ -1,9 +1,9 @@
-# EdgeDetection
+# ImageProcessing
 
 Creator:	Tanner Young-Schultz
 Date:		7 June, 2016
 
-C++ implementation of common edge detection algorithms in DSP
+C++ implementation of common image processing algorithms in DSP
 
 Directories and Files:
 
