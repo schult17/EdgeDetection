@@ -25,9 +25,12 @@ void SobelEdgeDetector::ApplyFilter()
     
     BMPPixel pixels[SOBEL_COUNT];
     
-    for( int x = 1; x < w-2; x++ )
+    //Note: If the wrap mode of the BMPImageData is set to BMPImageData::Null, getPixel()
+    //will return a 'NULL' BMPPixel, so going beyond the bounds is not a problem
+    //(Before we used x = 1, x < w - 1 and y = 1, y < h - 1)
+    for( int x = 0; x < w; x++ )
     {
-        for( int y = 1; y < h-2; y++ )
+        for( int y = 0; y < h; y++ )
         {
             //Get the 9 pixels
             for( int i = 0; i < SOBEL_COUNT; i++ )
@@ -47,20 +50,25 @@ void SobelEdgeDetector::ApplyFilter()
 unsigned int SobelEdgeDetector::filterPixels( BMPPixel *pixels )
 {
     int px = 0, py = 0;
+    int offset = 0;
     
     for( int x = 0; x < SOBEL_DIM; x++ )
     {
         for( int y = 0; y < SOBEL_DIM; y++ )
         {
-            px += filter_x[x][y] * (pixels[y * SOBEL_DIM + x]).toGrayScale();
-            py += filter_y[x][y] * (pixels[y * SOBEL_DIM + x]).toGrayScale();
+            offset = y * SOBEL_DIM + x;
+            if( !pixels[offset].isNull() )
+            {
+                px += filter_x[x][y] * pixels[offset].toGrayScale();
+                py += filter_y[x][y] * pixels[offset].toGrayScale();
+            }
         }
     }
     
-    px /= 4;
-    py /= 4;
+    //got rid of px /= 4, py /= 4 here, not supposed to be there?
     
-    return sqrt( px*px + py*py );       //round?
+    //return max( (abs(px) + abs(px)), 255 );   //approximation of sqrt(px^2, py^2), faster
+    return max( sqrt(px*px + py*py), 255 );
 }
 
 
