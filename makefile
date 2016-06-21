@@ -4,7 +4,7 @@
 # Variables to control Makefile operation
 CXX = g++
 CXXLINKER = g++ -o
-CXXFLAGS = -Wall -g -I$(HDIR)
+CXXFLAGS = -Wall -g -std=c++11 -I$(HDIR)
 TARGET = edgedetection
 
 # ***********************************************

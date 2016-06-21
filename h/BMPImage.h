@@ -17,29 +17,29 @@
 #define INFO_BITS_PER_PIXEL_OFFSET 14
 #define INFO_COMPRESSION_OFFSET 16
 
+
 class BMPImage
 {
 public:
     BMPImage( std::string filename );
-    BMPImage( const BMPImage &cpy );
-    BMPImage( const BMPImage &cpy, std::string filename );
-    BMPImage( const BMPImage &cpy, std::string filename, int init_val );
-    ~BMPImage();
     
-    void Remove();
+    BMPImage( const BMPImage &cpy );
+    BMPImage( const BMPImage &cpy, std::string filename = "output.bmp" );
+    BMPImage( const BMPImage &cpy, std::string filename = "output.bmp", BMPImageData * cpyData = NULL );
+    ~BMPImage();
     
     int getWidth(){ return pixelData->getWidth(); }
     int getHeight(){ return pixelData->getHeight(); }
     std::string GetFilename();
     std::string GetFilepath(){ return filename; }
-    BMPPixel getPixel( int x, int y ){ return pixelData->getPixel( x, y ); }
-    BMPImageData getPixelData();
+    BMPPixel getPixel( int x, int y ) { return pixelData->getPixel( x, y ); }
+    BMPImageData * getPixelData() { return pixelData; }
     
     void SetFilename(){ this->filename = filename; }
-    void writePixel( int x, int y, std::fstream &file );
     void setPixel( int x, int y, BMPPixel pixel ){ pixelData->setPixel( x, y, pixel ); }
+    void setWrapMode( BMPImageData::FillMode mode ) { pixelData->setFillMode( mode ); }
     
-    void swapPixelData( unsigned char *new_data ){ pixelData->swapPixelData( new_data ); }
+    void swapPixelData( BMPImageData *newData );
     
     void Write();
     
@@ -47,12 +47,15 @@ public:
     
 private:
     void Read();
-    
-    void onCopy( const BMPImage &cpy, std::string filename, int *init_val );
+    void OnCopy( const BMPImage &cpy );
+    void WriteHeaders( std::ofstream &file );
+    void WritePixel( int x, int y, std::ofstream &file );
     
     unsigned char bmpFileHeader[FILE_HEADER_SIZE];
     unsigned char pixelArrayOffset;
     unsigned char bmpInfoHeader[INFO_HEADER_SIZE];
+    unsigned char *padding;
+    int paddingSize;
     
     BMPImageData *pixelData;
     

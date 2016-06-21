@@ -14,41 +14,21 @@ const int SobelEdgeDetector::filter_y[SOBEL_DIM][SOBEL_DIM] = {{-1, -2, -1},
                                                                {0, 0, 0},
                                                                {1, 2, 1} };
 
-SobelEdgeDetector::SobelEdgeDetector()
-: EdgeDetector()
+
+SobelEdgeDetector::SobelEdgeDetector( BMPImage *bmpimage )
+: Filter( bmpimage )
 {}
 
-SobelEdgeDetector::SobelEdgeDetector( BMPImage *bmp )
-: EdgeDetector( bmp )
+SobelEdgeDetector::SobelEdgeDetector( BMPImageData *bmp )
+: Filter( bmp )
 {}
 
-void SobelEdgeDetector::EdgeDetection()
+void SobelEdgeDetector::ApplyFilter()
 {
     cout << "\tBeginning Sobel edge detection algorithm" << endl;
     
-    /*
-    BoxFilter f( bmp );
-    f.Filter();
-     */
-    
-    int w = bmp->getWidth();
-    int h = bmp->getHeight();
-    
-    /*
-    // testing with Box Filter
-    BMPPixel p;
-    for( int x = 0; x < w; x++ )
-    {
-        for( int y = 0; y < h; y++ )
-        {
-            p = bmp->getPixel( x, y );
-            WritePixel( x, y, p.R, p.G, p.B );
-        }
-    }
-    
-    bmp->swapPixelData( f.outbmp->getPixelData() );
-    //---------//
-     */
+    int w = Width();
+    int h = Height();
     
     unsigned int gray_pixel_val = 0;
     
@@ -60,7 +40,7 @@ void SobelEdgeDetector::EdgeDetection()
         {
             //Get the 9 pixels
             for( int i = 0; i < SOBEL_COUNT; i++ )
-                pixels[i] = bmp->getPixel( (x-1)+(i%SOBEL_DIM), (y-1)+(i/SOBEL_DIM) );
+                pixels[i] = getPixel( (x-1)+(i%SOBEL_DIM), (y-1)+(i/SOBEL_DIM) );
             
             //Get the gray scale value
             gray_pixel_val = filterPixels( pixels );

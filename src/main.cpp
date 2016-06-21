@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "BasicEdgeDetector.h"
 #include "SobelEdgeDetector.h"
+#include "BoxFilter.h"
 #include "BMPImage.h"
 #include "helpers.h"
 
@@ -34,10 +35,19 @@ int main(int argc, char* argv[])
             continue;
         }
 
-		BMPImage bmp( input );
-		//BasicEdgeDetector edgy( &bmp );
-        SobelEdgeDetector edgy( &bmp );
-		edgy.DetectEdges();
+        BMPImage bmp( input );
+        bmp.setWrapMode( BMPImageData::White );
+        
+        BoxFilter box( &bmp, 3 );
+        box.ApplyFilter();
+        
+        /*
+        SobelEdgeDetector sobel( box.GetOutputData() );
+        sobel.ApplyFilter();
+         */
+        
+        BMPImage outbmp( bmp, "output_images/test.bmp", box.GetOutputData() );
+        outbmp.Write();
 	}
 
 	return 0;

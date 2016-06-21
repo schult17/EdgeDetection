@@ -3,14 +3,14 @@
 
 #define THRESHOLD 120
 
-#include "EdgeDetector.h"
+#include "Filter.h"
 
-class BasicEdgeDetector : public EdgeDetector
+class BasicEdgeDetector : public Filter
 {
 public:
-    BasicEdgeDetector();
-    BasicEdgeDetector( BMPImage *bmp );
-    virtual void EdgeDetection();
+    BasicEdgeDetector( BMPImage *bmpimage );
+    BasicEdgeDetector( BMPImageData *bmp );
+    virtual void ApplyFilter();
     
 private:
     void FindEdges(bool horizontal);

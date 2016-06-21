@@ -3,15 +3,15 @@
 
 using namespace std;
 
-BasicEdgeDetector::BasicEdgeDetector()
-: EdgeDetector(), one_direction_detector_called( false )
+BasicEdgeDetector::BasicEdgeDetector( BMPImage *bmpimage )
+: Filter( bmpimage ), one_direction_detector_called( false )
 {}
 
-BasicEdgeDetector::BasicEdgeDetector( BMPImage *bmp )
-: EdgeDetector( bmp ), one_direction_detector_called( false )
+BasicEdgeDetector::BasicEdgeDetector( BMPImageData *bmp )
+: Filter( bmp ), one_direction_detector_called( false )
 {}
 
-void BasicEdgeDetector::EdgeDetection()
+void BasicEdgeDetector::ApplyFilter()
 {
     cout << "\tBeginning Basic edge detection algorithm" << endl;
     
@@ -25,8 +25,8 @@ void BasicEdgeDetector::EdgeDetection()
 void BasicEdgeDetector::FindEdges(bool horizontal)
 {
     bool set_non_edge_pixels_black = true;
-    int w = bmp->getWidth();
-    int h = bmp->getHeight();
+    int w = Width();
+    int h = Height();
     BMPPixel p1, p2;
     
     int Bmin = 300;
@@ -38,8 +38,8 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
     {
         for( int y = (!horizontal ? 0:1); y < h - (!horizontal ? 0:1); y++ )
         {
-            p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
-            p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
+            p1 = getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
+            p2 = getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
             
             diff = p2.toGrayScale() - p1.toGrayScale();
             
@@ -56,8 +56,8 @@ void BasicEdgeDetector::FindEdges(bool horizontal)
     {
         for( int y = (!horizontal ? 0:1); y < h - (!horizontal ? 0:1); y++ )
         {
-            p1 = bmp->getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
-            p2 = bmp->getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
+            p1 = getPixel( x-(horizontal ? 0:1), y-(!horizontal ? 0:1) );
+            p2 = getPixel( x+(horizontal ? 0:1), y+(!horizontal ? 0:1) );
         
             diff = p2.toGrayScale() - p1.toGrayScale();
             

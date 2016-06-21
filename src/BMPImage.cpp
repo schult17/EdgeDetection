@@ -9,95 +9,61 @@ using namespace std;
 
 bool BMPImage::out_of_bounds_pixel_read = false;
 
-BMPImage::BMPImage( string filename ) : filename( filename )
+BMPImage::BMPImage( string filename )
+: filename( filename )
 {
     Read();
 }
 
-BMPImage::BMPImage( const BMPImage &cpy )
-{
-    cerr << "FATAL: The copy constructor of the BMPImage is not availible!\n\t"
-            "The constructor: BMPImage( const BMPImage &cpy, string filename ) will not only copy the"
-    "object, but also make a copy of the BMP image. You must use this, or pass the BMPImage by reference" << endl;
-    
-    exit(-1);
-}
-
 BMPImage::BMPImage( const BMPImage &cpy, string filename )
+: filename( filename )
 {
-    onCopy( cpy, filename, NULL );
+    OnCopy( cpy );
+    pixelData = new BMPImageData( *(cpy.pixelData) );
 }
 
-BMPImage::BMPImage( const BMPImage &cpy, string filename, int init_val )
+BMPImage::BMPImage( const BMPImage &cpy, std::string filename, BMPImageData * cpyData )
+: filename( filename )
 {
-    onCopy( cpy, filename, &init_val );
+    if( cpyData == NULL )
+    {
+        cerr << __FILE__ << ":" << __LINE__ << "\tcpyData is NULL" << endl;
+        exit(-1);
+    }
+    
+    OnCopy( cpy );
+    pixelData = new BMPImageData( *cpyData );
 }
 
-void BMPImage::onCopy( const BMPImage &cpy, string filename, int *init_val )
+void BMPImage::OnCopy( const BMPImage &cpy )
 {
     //Copy the header data (same type of image)
     memcpy( bmpFileHeader, cpy.bmpFileHeader, FILE_HEADER_SIZE );
     pixelArrayOffset = cpy.pixelArrayOffset;
     memcpy( bmpInfoHeader, cpy.bmpInfoHeader, INFO_HEADER_SIZE );
     
-    //Use BMPImageData's copy constructor with the init_val pointer
-    delete pixelData;
-    pixelData = new BMPImageData( *(cpy.pixelData), *init_val );
+    paddingSize = cpy.paddingSize;
     
-    //making copy of actual image
-    ofstream copyfile( filename.c_str(), ios_base::out | ios_base::binary  );
-    ifstream infile( cpy.filename.c_str(), ios_base::in | ios_base::binary  );
-    
-    if( !infile )
-        cerr << "Couldn't open input file: " << cpy.filename << endl;
-    
-    if( !copyfile )
-        cerr << "Couldn't open output file: " << filename << endl;
-    
-    //use read and write, << and >> may skip spaces (big headache)
-    char c;
-    while(infile)
+    if( paddingSize != 0 )
     {
-        infile.read( &c, 1 );
-        copyfile.write( &c, 1 );
+        padding = new unsigned char[paddingSize];
+        memcpy( padding, cpy.padding, paddingSize );
     }
-    
-    //This got deleted, don't let this get deleted...
-    this->filename = filename;
+    else
+    {
+        padding = NULL;
+    }
 }
 
 BMPImage::~BMPImage()
 {
-    delete pixelData;
+    if( pixelData ) delete pixelData;
+    if( padding )   delete padding;
 }
 
-//Use this to delete the file AND the object.
-//If the file is gone, the object is useless.s
-void BMPImage::Remove()
+void BMPImage::swapPixelData( BMPImageData *newData )
 {
-    //remove the file
-    int OK = remove( filename.c_str() );
-    
-    if( !OK )
-    {
-        cerr << "Error when trying to delete file: " << filename << endl;
-        cerr << "Continuing to delete object..." << endl;
-    }
-    
-    delete this;
-}
-
-BMPImageData BMPImage::getPixelData()
-{
-    if( pixelData == NULL )
-    {
-        cerr << "FATAL: trying to call getPixelData() on a BMPImage that does not have a BMPImageData object allocated" << endl;
-        exit(-1);
-    }
-    else
-    {
-        return *pixelData;
-    }
+    *pixelData = *newData;
 }
 
 void BMPImage::Read()
@@ -179,6 +145,21 @@ void BMPImage::Read()
     
     pixel_data = new unsigned char[pixelArraySize];
     
+    //Read in the useless padding
+    padding = NULL;
+    paddingSize = (int)pixelArrayOffset - infile.tellg();
+    
+    if( paddingSize != 0 )
+    {
+        padding = new unsigned char[paddingSize];
+        
+        for( int i = 0; i < paddingSize; i++ )
+        {
+            infile.read( &read, 1 );
+            padding[i] = (unsigned char)read;
+        }
+    }
+    
     infile.seekg( pixelArrayOffset, ios::beg );
     
     for( int i = 0; i < pixelArraySize; i++ )
@@ -206,27 +187,9 @@ string BMPImage::GetFilename()
         return filename;
 }
 
-void BMPImage::writePixel( int x, int y, std::fstream &file )
-{
-    BMPPixel pixel = pixelData->getPixel( x, y );
-    
-    y = pixelData->getHeight() - 1 - y;         //flipping
-    
-    int base_offset = pixelArrayOffset + pixelData->getRowSize() * y + RGB_PIXEL_WIDTH * x;
-    
-    //write to file
-    file.seekg( base_offset, ios::beg );
-    file << pixel.B;
-    file.seekg( base_offset + 1, ios::beg );
-    file << pixel.G;
-    file.seekg( base_offset + 2, ios::beg );
-    file << pixel.R;
-    
-}
-
 void BMPImage::Write()
 {
-    fstream file( filename.c_str() );
+    ofstream file( filename.c_str() );
     
     if( !file )
     {
@@ -234,13 +197,43 @@ void BMPImage::Write()
     }
     else
     {
+        WriteHeaders( file );
+        
         int width = pixelData->getWidth();
         int height = pixelData->getHeight();
         
         for( int x = 0; x < width; x++ )
             for( int y = 0; y < height; y++ )
-                writePixel( x, y, file );
+                WritePixel( x, y, file );
     }
 }
 
+void BMPImage::WriteHeaders( ofstream &file )
+{
+    for( int i = 0; i < FILE_HEADER_SIZE; i++ )
+        file << bmpFileHeader[i];
+    
+    for( int i = 0; i < INFO_HEADER_SIZE; i++ )
+        file << bmpInfoHeader[i];
+    
+    for( int i = 0; i < paddingSize; i++ )
+        file << padding[i];
+}
 
+void BMPImage::WritePixel( int x, int y, ofstream &file )
+{
+    BMPPixel pixel = pixelData->getPixel( x, y );
+    
+    y = pixelData->getHeight() - 1 - y;         //flipping
+    
+    int base_offset = pixelArrayOffset + pixelData->getRowSize() * y + RGB_PIXEL_WIDTH * x;
+    
+    //write to file, seekp, not seekg (writing past eof)
+    file.seekp( base_offset, ios::beg );
+    file << pixel.B;
+    file.seekp( base_offset + 1, ios::beg );
+    file << pixel.G;
+    file.seekp( base_offset + 2, ios::beg );
+    file << pixel.R;
+    
+}
